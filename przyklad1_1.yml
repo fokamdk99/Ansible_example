@@ -1,0 +1,37 @@
+---
+- name: update web servers
+  hosts: linux
+  remote_user: root
+
+  tasks:
+  - name: ensure apache is at the latest version
+    yum: 
+      name: httpd 
+      state: latest
+
+  - name: ensure httpd is running
+    service:
+      name: httpd
+      state: started
+
+  - name: open port 80 for http access
+    firewalld:
+      service: http
+      permanent: true
+      state: enabled
+
+  - name: restart firewalld
+    service:
+      name: firewalld
+      state: restarted
+
+  - name: check apache status
+    command: systemctl status httpd
+    register: result
+
+  -name: reload apache
+   command: systemctl reload httpd
+
+  - name: show status report
+    debug:
+      var: result
